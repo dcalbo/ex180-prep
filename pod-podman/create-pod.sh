@@ -1,4 +1,4 @@
-#!/bin.bash
+#!/bin/bash
 # Create pod with containers web and mysql
 
 echo -n ". Creating pod webservice: "
