@@ -5,9 +5,10 @@ echo -n ". Creating pod webservice: "
 podman pod create --name webservice \
   --publish 30306:3306/TCP \
   --publish 30080:30080/TCP \
-  --publish 30000:8080/TCP 
+  --publish 30000:8080/TCP  &>/dev/null
+echo "OK"
 
-sudo rm -rf work-msql
+sudo rm -rf work-mysql
 
 if [ ! -d "work-mysql" ]; then
   echo -n ". Creating database volume: "
