@@ -1,0 +1,145 @@
+---
+apiVersion: v1
+kind: List
+metadata: {}
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: do180-apps
+      app.kubernetes.io/component: do180-apps
+      app.kubernetes.io/instance: do180-apps
+    name: do180-apps
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: do180-apps
+      app.kubernetes.io/component: do180-apps
+      app.kubernetes.io/instance: do180-apps
+    name: do180-apps
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: do180-apps:latest
+    postCommit: {}
+    resources: {}
+    source:
+      contextDir: php-helloworld
+      git:
+        ref: s2i
+        uri: https://github.com/dcalbo/DO180-apps
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: php:7.3
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: VKe5iQoX9FsutN4QP4YM
+      type: GitHub
+    - generic:
+        secret: D9ZdWbc0qHYNfyMgPfV-
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"do180-apps:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"do180-apps\")].image"}]'
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: do180-apps
+      app.kubernetes.io/component: do180-apps
+      app.kubernetes.io/instance: do180-apps
+    name: do180-apps
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: do180-apps
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deployment: do180-apps
+      spec:
+        containers:
+        - image: ' '
+          name: do180-apps
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          resources: {}
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: do180-apps
+      app.kubernetes.io/component: do180-apps
+      app.kubernetes.io/instance: do180-apps
+    name: do180-apps
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    selector:
+      deployment: do180-apps
+  status:
+    loadBalancer: {}
+
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: null
+  labels:
+    app: do180-apps
+    app.kubernetes.io/component: do180-apps
+    app.kubernetes.io/instance: do180-apps
+  name: do180-apps
+spec:
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: ""
+    name: do180-apps
+    weight: null
+status: {}
