@@ -4,29 +4,23 @@ MAINTAINER Diego Calbo <dcalbo@mbts.tech>
 
 ENV PORT 8080
 
-RUN yum update -y && yum install httpd --nodocs -y && yum install -y unzip --nodocs && yum clean all
+RUN yum install httpd --nodocs -y && yum install -y unzip --nodocs && yum clean all -y
 
 RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf && \
   chown -R apache:apache /etc/httpd/logs/ && \
   chown -R apache:apache /run/httpd/
 
-USER apache
-
 # Expose the custom port that you provided in the ENV var
 EXPOSE ${PORT}
 
 # Copy all files under src/ folder to Apache DocumentRoot (/var/www/html) 
-#COPY ./src/ /var/www/html/
-COPY src.zip /var/www/html/
+COPY src02.zip /var/www/html/ 
+COPY src02.tar.gz /var/www/html/
 
-RUN unzip /var/www/html/src.zip 
-RUN cp -R /var/www/html/src/* /var/www/html/ && \
-  rm -rf /var/www/html/src && rm -f /var/www/html/src.zip && \
-  semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?" && \
-  restorecon -Rv /var/www/html/ && \
-  rm -rf /tmp/src/ && \
-  yum remove unzip -y && \
-  yum clean all
+RUN yum remove unzip -y && \
+    yum clean all -y
+
+USER apache
 
 # Start Apache in the foreground
 CMD ["httpd", "-D", "FOREGROUND"]

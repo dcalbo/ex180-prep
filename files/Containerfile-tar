@@ -1,0 +1,33 @@
+FROM ubi8/ubi:8.5
+
+MAINTAINER Diego Calbo
+
+LABEL description="Image extracting a tar.gz file for content" \
+      version="v0.1-BETA"
+
+ENV PORT 8380
+ENV ERRORLOG /dev/stdout
+ENV LOGLEVEL debug
+ENV CUSTOMLOG "${ERRORLOG} common"
+
+RUN yum install httpd --nodocs -y && yum clean all -y
+
+RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf && \
+    sed -ri -e "/^ErrorLog/c\ErrorLog ${ERRORLOG}" /etc/httpd/conf/httpd.conf && \ 
+    sed -ri -e "/^LogLevel/c\LogLevel ${LOGLEVEL}" /etc/httpd/conf/httpd.conf && \
+    sed -ri -e "/^CustomLog/c\CustomLog ${CUSTOMLOG}" /etc/httpd/conf/httpd.conf 
+
+RUN chown -R apache:apache /etc/httpd/logs/ && \
+    chown -R apache:apache /run/httpd/
+
+EXPOSE ${PORT}
+
+ADD http://localhost:8080/src02.tar.gz /var/www/html/
+
+RUN tar xzvf /var/www/html/src02.tar.gz -C /var/www/html/
+
+RUN ls -ltr /var/www/html/
+
+USER apache
+
+CMD ["httpd", "-D", "FOREGROUND"]
