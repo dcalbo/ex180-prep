@@ -1,6 +1,6 @@
 FROM ubi8/ubi:8.5
 
-MAINTAINER Diego Calbo <dcalbo#mbts.tech>
+MAINTAINER Diego Calbo <dcalbo@mbts.tech>
 
 ENV PORT 8280
 
