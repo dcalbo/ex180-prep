@@ -1,26 +1,20 @@
-FROM ubi8/ubi:8.5
+FROM docker.io/farrout/jboss-base:7.2
+MAINTAINER Chandra Prakash < cprakash@qcsdclabs.com >
+LABEL description="EX180 exam setup"
 
-MAINTAINER Diego Calbo <dcalbo@mbts.tech>
+USER root
 
-ENV PORT 8080
+RUN mkdir -p /opt/jboss
+COPY jboss-eap-7.2.0.zip /opt/jboss/ 
+RUN unzip /opt/jboss/jboss-eap-7.2.0.zip -d /opt/jboss/
 
-RUN yum install httpd --nodocs -y && yum install -y unzip --nodocs && yum clean all -y
+RUN chown -R jboss:jboss /opt/jboss  && \
+    chmod -R 755 /opt/jboss
 
-RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf && \
-  chown -R apache:apache /etc/httpd/logs/ && \
-  chown -R apache:apache /run/httpd/
+CMD ["/opt/jboss/jboss-eap-7.2/bin/add-user.sh -u chandra redhat"]
 
-# Expose the custom port that you provided in the ENV var
-EXPOSE ${PORT}
+ENV JBOSS_HOME="/opt/jboss/jboss-eap-7.2"
+USER jboss
 
-# Copy all files under src/ folder to Apache DocumentRoot (/var/www/html) 
-COPY src02.zip /var/www/html/ 
-COPY src02.tar.gz /var/www/html/
-
-RUN yum remove unzip -y && \
-    yum clean all -y
-
-USER apache
-
-# Start Apache in the foreground
-CMD ["httpd", "-D", "FOREGROUND"]
+EXPOSE 80 8080 9990 9999
+CMD ["/opt/jboss/jboss-eap-7.2/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]

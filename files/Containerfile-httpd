@@ -1,0 +1,26 @@
+FROM ubi8/ubi:8.5
+
+MAINTAINER Diego Calbo <dcalbo@mbts.tech>
+
+ENV PORT 8080
+
+RUN yum install httpd --nodocs -y && yum install -y unzip --nodocs && yum clean all -y
+
+RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf && \
+  chown -R apache:apache /etc/httpd/logs/ && \
+  chown -R apache:apache /run/httpd/
+
+# Expose the custom port that you provided in the ENV var
+EXPOSE ${PORT}
+
+# Copy all files under src/ folder to Apache DocumentRoot (/var/www/html) 
+COPY src02.zip /var/www/html/ 
+COPY src02.tar.gz /var/www/html/
+
+RUN yum remove unzip -y && \
+    yum clean all -y
+
+USER apache
+
+# Start Apache in the foreground
+CMD ["httpd", "-D", "FOREGROUND"]
